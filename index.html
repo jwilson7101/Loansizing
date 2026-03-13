@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoanSizing.com — Commercial Real Estate Loan Calculator</title>
+  <meta name="description" content="Free commercial real estate loan sizing calculator. Calculate maximum loan amounts using DSCR, LTV, and Debt Yield constraints. Built for CRE brokers, investors, and lenders.">
+  <meta property="og:title" content="LoanSizing.com — CRE Loan Calculator">
+  <meta property="og:description" content="The mortgage calculator for commercial real estate. Size loans by DSCR, LTV, and Debt Yield instantly.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f7f6f3;
+      --bg-tertiary: #f0ede8;
+      --text-primary: #1a1a18;
+      --text-secondary: #6b6a65;
+      --text-hint: #9b9a95;
+      --border: rgba(0,0,0,0.10);
+      --border-md: rgba(0,0,0,0.18);
+      --blue-50: #E6F1FB;
+      --blue-100: #B5D4F4;
+      --blue-200: #85B7EB;
+      --blue-600: #185FA5;
+      --blue-800: #0C447C;
+      --blue-900: #042C53;
+      --teal-50: #E1F5EE;
+      --teal-600: #0F6E56;
+      --teal-800: #085041;
+      --amber-50: #FAEEDA;
+      --amber-600: #854F0B;
+      --red-50: #FCEBEB;
+      --red-600: #A32D2D;
+      --green-50: #EAF3DE;
+      --green-600: #3B6D11;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1a;
+        --bg-secondary: #252522;
+        --bg-tertiary: #2c2c29;
+        --text-primary: #f0ede8;
+        --text-secondary: #9b9a95;
+        --text-hint: #6b6a65;
+        --border: rgba(255,255,255,0.10);
+        --border-md: rgba(255,255,255,0.18);
+        --blue-50: #042C53;
+        --blue-100: #0C447C;
+        --blue-200: #185FA5;
+        --blue-600: #85B7EB;
+        --blue-800: #B5D4F4;
+        --blue-900: #E6F1FB;
+        --teal-50: #04342C;
+        --teal-600: #5DCAA5;
+        --teal-800: #9FE1CB;
+        --amber-50: #412402;
+        --amber-600: #EF9F27;
+        --red-50: #501313;
+        --red-600: #F09595;
+        --green-50: #173404;
+        --green-600: #97C459;
+      }
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* HEADER */
+    .site-nav {
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 20px; font-weight: 500; letter-spacing: -0.5px; text-decoration: none; color: var(--text-primary); }
+    .logo span { color: var(--blue-600); }
+    .nav-tag { font-size: 12px; color: var(--text-secondary); background: var(--bg-secondary); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 4px 10px; }
+
+    /* HERO */
+    .hero {
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+    }
+    .hero h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+    .hero h1 span { color: var(--blue-600); }
+    .hero p { font-size: 15px; color: var(--text-secondary); max-width: 520px; margin: 0 auto; }
+    .hero-pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .pill { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); }
+
+    /* MAIN LAYOUT */
+    .main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+    /* TABS */
+    .tab-row {
+      display: flex; gap: 4px; background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 4px; margin-bottom: 1.5rem;
+    }
+    .tab {
+      flex: 1; text-align: center; padding: 9px 6px; font-size: 13px; font-weight: 500;
+      border-radius: var(--radius-md); cursor: pointer; color: var(--text-secondary);
+      border: none; background: transparent; transition: all .15s; font-family: 'DM Sans', sans-serif;
+    }
+    .tab.active { background: var(--blue-800); color: #fff; }
+    .tab:hover:not(.active) { background: var(--bg-secondary); color: var(--text-primary); }
+
+    /* GRID */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 660px) { .grid2 { grid-template-columns: 1fr; } }
+
+    /* CARDS */
+    .card {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+    .card + .card { margin-top: 1.25rem; }
+    .card-title {
+      font-size: 11px; font-weight: 500; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: .7px; margin-bottom: 1rem;
+    }
+
+    /* FIELDS */
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .label { font-size: 13px; color: var(--text-secondary); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+    .label strong { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-primary); }
+
+    /* RANGE INPUTS */
+    input[type=range] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 4px; border-radius: 2px;
+      background: var(--bg-secondary); outline: none; cursor: pointer;
+      border: 0.5px solid var(--border);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--blue-800); border: 2px solid var(--bg); cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--blue-800); border: 2px solid var(--bg); cursor: pointer;
+    }
+
+    /* NUMBER INPUTS */
+    .input-wrap { position: relative; }
+    .input-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text-secondary); }
+    .input-suffix { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text-secondary); }
+    input[type=number] {
+      width: 100%; padding: 8px 10px 8px 22px; font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border-md); border-radius: var(--radius-md);
+      background: var(--bg-secondary); color: var(--text-primary);
+      outline: none;
+    }
+    input[type=number]:focus { border-color: var(--blue-600); }
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    select {
+      width: 100%; padding: 8px 10px; font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border-md); border-radius: var(--radius-md);
+      background: var(--bg-secondary); color: var(--text-primary); outline: none;
+    }
+    select:focus { border-color: var(--blue-600); }
+
+    /* BINDING BOX */
+    .binding-box {
+      background: var(--blue-50); border: 0.5px solid var(--blue-100);
+      border-radius: var(--radius-md); padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px; margin-bottom: 1.25rem;
+    }
+    .binding-icon {
+      width: 40px; height: 40px; border-radius: 50%; background: var(--blue-800);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .binding-label { font-size: 11px; color: var(--blue-800); margin-bottom: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+    .binding-val { font-size: 26px; font-weight: 500; font-family: 'DM Mono', monospace; color: var(--blue-900); line-height: 1; }
+    .binding-sub { font-size: 12px; color: var(--blue-600); margin-top: 3px; }
+
+    /* METRIC CARDS */
+    .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .metrics-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    @media (max-width: 400px) { .metrics-grid { grid-template-columns: 1fr 1fr; } }
+    .metric {
+      background: var(--bg-secondary); border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+    .metric-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 500; letter-spacing: .3px; }
+    .metric-val { font-size: 18px; font-weight: 500; font-family: 'DM Mono', monospace; line-height: 1; }
+    .metric-sub { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+    /* CONSTRAINT ROWS */
+    .c-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+    .c-row:last-child { border-bottom: none; }
+    .c-name { font-size: 13px; font-weight: 500; }
+    .c-detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* BADGES */
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 4px; white-space: nowrap; }
+    .badge-pass { background: var(--teal-50); color: var(--teal-600); }
+    .badge-fail { background: var(--red-50); color: var(--red-600); }
+    .badge-warn { background: var(--amber-50); color: var(--amber-600); }
+
+    /* DIVIDER */
+    hr { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
+
+    /* BARS */
+    .bar-wrap { margin-top: 6px; }
+    .bar-lbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+    .bar-track { height: 5px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+    .bar-blue { background: var(--blue-600); }
+    .bar-teal { background: var(--teal-600); }
+    .bar-amber { background: var(--amber-600); }
+    .bar-red { background: var(--red-600); }
+
+    /* TOGGLE BUTTONS */
+    .tog-row { display: flex; gap: 6px; margin-bottom: 1rem; }
+    .tog {
+      flex: 1; padding: 7px; text-align: center; font-size: 13px; font-weight: 500;
+      border-radius: var(--radius-md); cursor: pointer;
+      border: 0.5px solid var(--border-md); background: transparent;
+      color: var(--text-secondary); font-family: 'DM Sans', sans-serif; transition: all .15s;
+    }
+    .tog.sel { background: var(--blue-800); color: #fff; border-color: var(--blue-800); }
+
+    /* AMORT TABLE */
+    .table-wrap { overflow-y: auto; max-height: 480px; }
+    .data-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 7px 8px; font-weight: 500; color: var(--text-secondary); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); font-size: 11px; }
+    .data-table td { padding: 6px 8px; border-bottom: 0.5px solid var(--border); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--bg-secondary); }
+
+    /* SENSITIVITY TABLE */
+    .sens-wrap { overflow-x: auto; margin-top: 8px; }
+
+    /* INFO TEXT */
+    .info-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+    .info-text strong { color: var(--text-primary); font-weight: 500; }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid var(--border);
+      background: var(--bg);
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    }
+    footer p { font-size: 12px; color: var(--text-secondary); }
+    footer a { color: var(--blue-600); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <a class="logo" href="/">loan<span>sizing</span>.com</a>
+  <span class="nav-tag">Commercial Real Estate</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>The <span>CRE Loan Calculator</span></h1>
+  <p>Size commercial real estate loans instantly using DSCR, LTV, and Debt Yield — the same three constraints every lender uses.</p>
+  <div class="hero-pills">
+    <span class="pill">DSCR</span>
+    <span class="pill">Loan-to-Value</span>
+    <span class="pill">Debt Yield</span>
+    <span class="pill">Amortization</span>
+    <span class="pill">Binding Constraint</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('size')">Loan Sizing</button>
+    <button class="tab" onclick="switchTab('dscr')">DSCR Deep Dive</button>
+    <button class="tab" onclick="switchTab('amort')">Amortization</button>
+    <button class="tab" onclick="switchTab('about')">How It Works</button>
+  </div>
+
+  <!-- ===================== TAB: LOAN SIZING ===================== -->
+  <div id="tab-size">
+    <div class="grid2">
+
+      <!-- LEFT: INPUTS -->
+      <div>
+        <div class="card">
+          <div class="card-title">Property &amp; Income</div>
+          <div class="field">
+            <div class="label">Property Value / Purchase Price <strong id="lbl-val">$10,000,000</strong></div>
+            <input type="range" id="prop-val" min="500000" max="50000000" step="100000" value="10000000" oninput="calc()">
+          </div>
+          <div class="field">
+            <div class="label">Net Operating Income (NOI) / Year <strong id="lbl-noi">$700,000</strong></div>
+            <input type="range" id="noi" min="50000" max="5000000" step="10000" value="700000" oninput="calc()">
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-lbl"><span>Implied Cap Rate</span><span id="bar-cap-lbl">7.00%</span></div>
+            <div class="bar-track"><div class="bar-fill bar-blue" id="bar-cap" style="width:70%"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Loan Parameters</div>
+          <div class="field">
+            <div class="label">Interest Rate <strong id="lbl-rate">6.50%</strong></div>
+            <input type="range" id="rate" min="3" max="12" step="0.25" value="6.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <div class="label">Amortization Period <strong id="lbl-amort">30 yrs</strong></div>
+            <input type="range" id="amort" min="10" max="40" step="5" value="30" oninput="calc()">
+          </div>
+          <div class="field">
+            <div class="label">Interest Only Period <strong id="lbl-io">0 yrs</strong></div>
+            <input type="range" id="io" min="0" max="10" step="1" value="0" oninput="calc()">
+          </div>
+          <div class="field">
+            <div class="label">Loan Term <strong id="lbl-term">10 yrs</strong></div>
+            <input type="range" id="term" min="3" max="30" step="1" value="10" oninput="calc()">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Lender Constraints</div>
+          <div class="field">
+            <div class="label">Maximum LTV <strong id="lbl-mltv">70%</strong></div>
+            <input type="range" id="mltv" min="50" max="80" step="5" value="70" oninput="calc()">
+          </div>
+          <div class="field">
+            <div class="label">Minimum DSCR <strong id="lbl-mdscr">1.25x</strong></div>
+            <input type="range" id="mdscr" min="1.0" max="1.6" step="0.05" value="1.25" oninput="calc()">
+          </div>
+          <div class="field">
+            <div class="label">Minimum Debt Yield <strong id="lbl-mdy">8.0%</strong></div>
+            <input type="range" id="mdy" min="5" max="15" step="0.5" value="8.0" oninput="calc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: RESULTS -->
+      <div>
+        <div class="card" style="border-color: var(--blue-100);">
+          <div class="card-title">Maximum Loan Amount</div>
+          <div class="binding-box">
+            <div class="binding-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <div>
+              <div class="binding-label" id="binding-label">Binding: —</div>
+              <div class="binding-val" id="binding-val">—</div>
+              <div class="binding-sub" id="binding-sub">Lowest of three constraints</div>
+            </div>
+          </div>
+
+          <div class="metrics-grid" style="margin-bottom:1.25rem">
+            <div class="metric">
+              <div class="metric-label">Max by LTV</div>
+              <div class="metric-val" id="r-ltv-loan">—</div>
+              <div class="metric-sub" id="r-ltv-pct">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Max by DSCR</div>
+              <div class="metric-val" id="r-dscr-loan">—</div>
+              <div class="metric-sub" id="r-dscr-pct">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Max by Debt Yield</div>
+              <div class="metric-val" id="r-dy-loan">—</div>
+              <div class="metric-sub" id="r-dy-pct">—</div>
+            </div>
+          </div>
+
+          <hr>
+          <div class="card-title">Metrics at Max Loan Amount</div>
+
+          <div class="c-row">
+            <div>
+              <div class="c-name">LTV Ratio</div>
+              <div class="c-detail" id="ltv-detail">—</div>
+            </div>
+            <span class="badge" id="ltv-badge">—</span>
+          </div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">DSCR</div>
+              <div class="c-detail" id="dscr-detail">—</div>
+            </div>
+            <span class="badge" id="dscr-badge">—</span>
+          </div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">Debt Yield</div>
+              <div class="c-detail" id="dy-detail">—</div>
+            </div>
+            <span class="badge" id="dy-badge">—</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Additional Metrics at Max Loan</div>
+          <div class="metrics-grid-2">
+            <div class="metric">
+              <div class="metric-label">Annual Debt Service</div>
+              <div class="metric-val" id="r-ads">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Monthly Payment</div>
+              <div class="metric-val" id="r-monthly">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Loan Constant</div>
+              <div class="metric-val" id="r-const">—</div>
+              <div class="metric-sub">annual % of loan</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Break-Even Occ.</div>
+              <div class="metric-val" id="r-beo">—</div>
+              <div class="metric-sub">to cover debt service</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Constraint Comparison</div>
+          <div class="bar-wrap" style="margin-bottom:10px">
+            <div class="bar-lbl"><span>LTV Constraint</span><span id="bc-ltv-lbl">—</span></div>
+            <div class="bar-track"><div class="bar-fill bar-blue" id="bc-ltv" style="width:0%"></div></div>
+          </div>
+          <div class="bar-wrap" style="margin-bottom:10px">
+            <div class="bar-lbl"><span>DSCR Constraint</span><span id="bc-dscr-lbl">—</span></div>
+            <div class="bar-track"><div class="bar-fill bar-teal" id="bc-dscr" style="width:0%"></div></div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-lbl"><span>Debt Yield Constraint</span><span id="bc-dy-lbl">—</span></div>
+            <div class="bar-track"><div class="bar-fill bar-amber" id="bc-dy" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: DSCR DEEP DIVE ===================== -->
+  <div id="tab-dscr" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="card-title">Build NOI from Scratch</div>
+          <div class="field">
+            <div class="label">Gross Potential Rent (Annual) <strong id="d-gpr-lbl">$900,000</strong></div>
+            <input type="range" id="d-gpr" min="100000" max="6000000" step="10000" value="900000" oninput="calcDscr()">
+          </div>
+          <div class="field">
+            <div class="label">Vacancy &amp; Credit Loss <strong id="d-vac-lbl">5%</strong></div>
+            <input type="range" id="d-vac" min="0" max="25" step="1" value="5" oninput="calcDscr()">
+          </div>
+          <div class="field">
+            <div class="label">Operating Expense Ratio <strong id="d-exp-lbl">25%</strong></div>
+            <input type="range" id="d-exp" min="10" max="60" step="1" value="25" oninput="calcDscr()">
+          </div>
+          <hr>
+          <div class="field">
+            <div class="label">Replacement Reserves (per unit/SF)</div>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="d-res" value="0" min="0" oninput="calcDscr()">
+            </div>
+          </div>
+          <div class="field">
+            <div class="label">Number of Units / SF</div>
+            <div class="input-wrap">
+              <input type="number" id="d-units" value="0" min="0" oninput="calcDscr()" style="padding-left:10px">
+            </div>
+          </div>
+          <div class="field">
+            <div class="label">Loan Amount (for DSCR calc)</div>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="d-loan" value="7000000" min="0" step="100000" oninput="calcDscr()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">NOI Waterfall</div>
+          <div class="c-row">
+            <div class="c-name">Gross Potential Rent</div>
+            <div style="font-family:'DM Mono',monospace;font-size:13px" id="dw-gpr">—</div>
+          </div>
+          <div class="c-row">
+            <div class="c-name" style="color:var(--text-secondary)">Less: Vacancy</div>
+            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-secondary)" id="dw-vac">—</div>
+          </div>
+          <div class="c-row">
+            <div class="c-name">Effective Gross Income</div>
+            <div style="font-family:'DM Mono',monospace;font-size:13px" id="dw-egi">—</div>
+          </div>
+          <div class="c-row">
+            <div class="c-name" style="color:var(--text-secondary)">Less: Operating Expenses</div>
+            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-secondary)" id="dw-opex">—</div>
+          </div>
+          <div class="c-row">
+            <div class="c-name" style="color:var(--text-secondary)">Less: Reserves</div>
+            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-secondary)" id="dw-res">—</div>
+          </div>
+          <div class="c-row" style="border-top:1px solid var(--border-md)">
+            <div class="c-name">Net Operating Income</div>
+            <div style="font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--teal-600)" id="dw-noi">—</div>
+          </div>
+          <hr>
+          <div class="metrics-grid-2">
+            <div class="metric">
+              <div class="metric-label">DSCR</div>
+              <div class="metric-val" id="d-dscr-val" style="color:var(--teal-600)">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Debt Yield</div>
+              <div class="metric-val" id="d-dy-val">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">DSCR Sensitivity — Rate × NOI</div>
+          <div class="sens-wrap">
+            <table class="data-table" id="dscr-table">
+              <thead><tr id="dscr-thead"></tr></thead>
+              <tbody id="dscr-tbody"></tbody>
+            </table>
+          </div>
+          <p class="info-text" style="margin-top:10px;font-size:11px">Rows = NOI ±20% in 10% steps. Columns = rate ±1.5%. Green = ≥1.35x, light green = ≥1.25x, amber = ≥1.10x, red = below.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: AMORTIZATION ===================== -->
+  <div id="tab-amort" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="card-title">Loan Schedule Settings</div>
+          <div class="tog-row">
+            <button class="tog sel" id="tog-full" onclick="setIo(false)">Fully Amortizing</button>
+            <button class="tog" id="tog-io" onclick="setIo(true)">Interest Only Period</button>
+          </div>
+          <div class="field">
+            <div class="label">Loan Amount <strong id="am-loan-lbl">$7,000,000</strong></div>
+            <input type="range" id="am-loan" min="500000" max="30000000" step="100000" value="7000000" oninput="calcAmort()">
+          </div>
+          <div class="field">
+            <div class="label">Interest Rate <strong id="am-rate-lbl">6.50%</strong></div>
+            <input type="range" id="am-rate" min="3" max="12" step="0.25" value="6.5" oninput="calcAmort()">
+          </div>
+          <div class="field">
+            <div class="label">Amortization Period <strong id="am-am-lbl">30 yrs</strong></div>
+            <input type="range" id="am-am" min="10" max="40" step="5" value="30" oninput="calcAmort()">
+          </div>
+          <div class="field">
+            <div class="label">Loan Term <strong id="am-term-lbl">10 yrs</strong></div>
+            <input type="range" id="am-term" min="3" max="30" step="1" value="10" oninput="calcAmort()">
+          </div>
+          <div id="io-field" style="display:none">
+            <div class="field">
+              <div class="label">I/O Period <strong id="am-io-lbl">3 yrs</strong></div>
+              <input type="range" id="am-io" min="1" max="10" step="1" value="3" oninput="calcAmort()">
+            </div>
+          </div>
+          <hr>
+          <div class="metrics-grid-2">
+            <div class="metric">
+              <div class="metric-label">Monthly Payment</div>
+              <div class="metric-val" id="am-monthly">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Balloon Balance</div>
+              <div class="metric-val" id="am-balloon">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total Interest Paid</div>
+              <div class="metric-val" id="am-totint">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total Payments</div>
+              <div class="metric-val" id="am-totpay">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding-bottom:0">
+        <div class="card-title">Annual Payment Schedule</div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Payment</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Balance</th>
+                <th>I/O</th>
+              </tr>
+            </thead>
+            <tbody id="am-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: HOW IT WORKS ===================== -->
+  <div id="tab-about" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="card-title">The Three Sizing Constraints</div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">1. Loan-to-Value (LTV)</div>
+              <div class="c-detail" style="margin-top:6px;line-height:1.6">The most straightforward cap — limits the loan as a percentage of the property's appraised value or purchase price. Commercial lenders typically set 60–75% LTV. Lower LTV means more equity cushion for the lender.<br><br><strong>Max Loan = Property Value × Max LTV%</strong></div>
+            </div>
+          </div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">2. Debt Service Coverage Ratio (DSCR)</div>
+              <div class="c-detail" style="margin-top:6px;line-height:1.6">DSCR = NOI ÷ Annual Debt Service. Lenders typically require 1.20–1.30x minimum. A 1.25x DSCR means the property earns $1.25 for every $1.00 of debt service. The loan is sized so that at the required DSCR, debt service equals NOI ÷ min DSCR.</div>
+            </div>
+          </div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">3. Debt Yield (DY)</div>
+              <div class="c-detail" style="margin-top:6px;line-height:1.6">Debt Yield = NOI ÷ Loan Amount. Lenders require ≥ 8–10%. Unlike DSCR, debt yield is interest rate-agnostic — it measures what return the lender would earn if they foreclosed today. It became more prominent after 2008 for CMBS loans.<br><br><strong>Max Loan = NOI ÷ Min Debt Yield</strong></div>
+            </div>
+          </div>
+          <div class="c-row" style="border-bottom:none">
+            <div>
+              <div class="c-name">Binding Constraint</div>
+              <div class="c-detail" style="margin-top:6px;line-height:1.6">The maximum loan is the <strong>lowest</strong> of the three. Whichever produces the smallest loan "binds" — that's what the lender will approve. All three constraints must be satisfied simultaneously.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">When Each Constraint Binds</div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">LTV binds when...</div>
+              <div class="c-detail" style="margin-top:4px;line-height:1.6">Cap rates are high or interest rates are low. The property value supports more debt than the income can service. Common in high-value markets with compressed cap rates.</div>
+            </div>
+          </div>
+          <div class="c-row">
+            <div>
+              <div class="c-name">DSCR binds when...</div>
+              <div class="c-detail" style="margin-top:4px;line-height:1.6">Interest rates are high or NOI is thin relative to value. The income can't support the debt service needed at full LTV. Most common today with rates at 6–7%+.</div>
+            </div>
+          </div>
+          <div class="c-row" style="border-bottom:none">
+            <div>
+              <div class="c-name">Debt Yield binds when...</div>
+              <div class="c-detail" style="margin-top:4px;line-height:1.6">The lender wants an income-based floor regardless of interest rates. Very common in CMBS, bridge, and value-add lending. Protects the lender in a foreclosure scenario.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Formulas Reference</div>
+          <div class="c-row">
+            <div>
+              <div class="c-name" style="font-family:'DM Mono',monospace;font-size:12px">Monthly Payment (PMT)</div>
+              <div class="c-detail">P × [r(1+r)ⁿ] ÷ [(1+r)ⁿ−1]<br>r = monthly rate, n = amortization months</div>
+            </div>
+          </div>
+          <div class="c-row">
+            <div>
+              <div class="c-name" style="font-family:'DM Mono',monospace;font-size:12px">Loan Constant</div>
+              <div class="c-detail">= Annual Debt Service ÷ Loan Amount<br>Expresses debt service as a % of the loan</div>
+            </div>
+          </div>
+          <div class="c-row" style="border-bottom:none">
+            <div>
+              <div class="c-name" style="font-family:'DM Mono',monospace;font-size:12px">Break-Even Occupancy</div>
+              <div class="c-detail">= (OpEx + Debt Service) ÷ Gross Potential Income<br>Occupancy needed to cover all obligations</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">About LoanSizing.com</div>
+          <p class="info-text">LoanSizing.com is a free tool built for commercial real estate professionals — brokers, investors, and lenders — who need to quickly size loans without complex spreadsheets. Unlike residential mortgage calculators, CRE loans are constrained by income metrics, not just collateral value.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 <a href="/">LoanSizing.com</a> — Commercial Real Estate Loan Calculator</p>
+  <p>For educational purposes. Not financial advice. Consult a licensed lender for actual loan terms.</p>
+</footer>
+
+<script>
+  let useIo = false;
+
+  function fmt(n) {
+    if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtFull(n) { return '$' + Math.round(n).toLocaleString(); }
+  function pct(n, d) { return (n * 100).toFixed(d !== undefined ? d : 1) + '%'; }
+
+  function monthlyPayment(P, annualRate, amortYears) {
+    const r = annualRate / 12;
+    const n = amortYears * 12;
+    if (r === 0) return P / n;
+    return P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  function loanConstant(annualRate, amortYears) {
+    return monthlyPayment(1, annualRate, amortYears) * 12;
+  }
+
+  function calc() {
+    const val    = +document.getElementById('prop-val').value;
+    const noi    = +document.getElementById('noi').value;
+    const rate   = +document.getElementById('rate').value / 100;
+    const amYrs  = +document.getElementById('amort').value;
+    const ioYrs  = +document.getElementById('io').value;
+    const termYrs= +document.getElementById('term').value;
+    const mltv   = +document.getElementById('mltv').value / 100;
+    const mdscr  = +document.getElementById('mdscr').value;
+    const mdy    = +document.getElementById('mdy').value / 100;
+
+    document.getElementById('lbl-val').textContent   = fmt(val);
+    document.getElementById('lbl-noi').textContent   = fmt(noi);
+    document.getElementById('lbl-rate').textContent  = (+document.getElementById('rate').value).toFixed(2) + '%';
+    document.getElementById('lbl-amort').textContent = amYrs + ' yrs';
+    document.getElementById('lbl-io').textContent    = ioYrs + ' yrs';
+    document.getElementById('lbl-term').textContent  = termYrs + ' yrs';
+    document.getElementById('lbl-mltv').textContent  = (+document.getElementById('mltv').value) + '%';
+    document.getElementById('lbl-mdscr').textContent = mdscr.toFixed(2) + 'x';
+    document.getElementById('lbl-mdy').textContent   = (+document.getElementById('mdy').value).toFixed(1) + '%';
+
+    const capRate = noi / val;
+    document.getElementById('bar-cap-lbl').textContent = pct(capRate, 2);
+    document.getElementById('bar-cap').style.width = Math.min(capRate * 10 * 100, 100) + '%';
+
+    const ltvLoan  = val * mltv;
+    const lc       = ioYrs > 0 ? rate : loanConstant(rate, amYrs);
+    const dscrLoan = (noi / mdscr) / lc;
+    const dyLoan   = noi / mdy;
+    const maxLoan  = Math.min(ltvLoan, dscrLoan, dyLoan);
+    const binding  = maxLoan === ltvLoan ? 'LTV' : maxLoan === dscrLoan ? 'DSCR' : 'Debt Yield';
+
+    document.getElementById('r-ltv-loan').textContent  = fmt(ltvLoan);
+    document.getElementById('r-ltv-pct').textContent   = pct(mltv) + ' of value';
+    document.getElementById('r-dscr-loan').textContent = fmt(dscrLoan);
+    document.getElementById('r-dscr-pct').textContent  = mdscr.toFixed(2) + 'x min DSCR';
+    document.getElementById('r-dy-loan').textContent   = fmt(dyLoan);
+    document.getElementById('r-dy-pct').textContent    = pct(mdy) + ' min DY';
+
+    document.getElementById('binding-val').textContent   = fmtFull(maxLoan);
+    document.getElementById('binding-label').textContent = 'Binding: ' + binding;
+
+    const annualDS   = ioYrs > 0 ? maxLoan * rate : monthlyPayment(maxLoan, rate, amYrs) * 12;
+    const monthly    = ioYrs > 0 ? maxLoan * rate / 12 : monthlyPayment(maxLoan, rate, amYrs);
+    const actualDscr = noi / annualDS;
+    const actualLtv  = maxLoan / val;
+    const actualDy   = noi / maxLoan;
+    const actualConst= annualDS / maxLoan;
+    const beo        = annualDS / noi;
+
+    document.getElementById('r-ads').textContent     = fmt(annualDS);
+    document.getElementById('r-monthly').textContent = fmt(monthly);
+    document.getElementById('r-const').textContent   = pct(actualConst, 2);
+    document.getElementById('r-beo').textContent     = pct(beo, 1);
+
+    setBadge('ltv-badge', 'ltv-detail',   pct(actualLtv, 1), 'LTV at max loan',         actualLtv <= mltv + 0.001,  'Max: ' + pct(mltv));
+    setBadge('dscr-badge', 'dscr-detail', actualDscr.toFixed(2) + 'x', 'DSCR at max loan',  actualDscr >= mdscr - 0.01, 'Min: ' + mdscr.toFixed(2) + 'x');
+    setBadge('dy-badge', 'dy-detail',     pct(actualDy, 1), 'Debt Yield at max loan',   actualDy >= mdy - 0.0001,   'Min: ' + pct(mdy));
+
+    const maxOfThree = Math.max(ltvLoan, dscrLoan, dyLoan);
+    function barPct(v) { return Math.round((v / maxOfThree) * 100); }
+    document.getElementById('bc-ltv').style.width  = barPct(ltvLoan) + '%';
+    document.getElementById('bc-dscr').style.width = barPct(dscrLoan) + '%';
+    document.getElementById('bc-dy').style.width   = barPct(dyLoan) + '%';
+    document.getElementById('bc-ltv-lbl').textContent  = fmt(ltvLoan);
+    document.getElementById('bc-dscr-lbl').textContent = fmt(dscrLoan);
+    document.getElementById('bc-dy-lbl').textContent   = fmt(dyLoan);
+
+    document.getElementById('am-loan').value = Math.round(maxLoan);
+    calcAmort();
+  }
+
+  function setBadge(bId, dId, val, label, pass, threshold) {
+    const b = document.getElementById(bId);
+    const d = document.getElementById(dId);
+    b.textContent = val;
+    b.className = 'badge ' + (pass ? 'badge-pass' : 'badge-fail');
+    d.textContent = label + ' — ' + threshold;
+  }
+
+  function switchTab(t) {
+    ['size', 'dscr', 'amort', 'about'].forEach(id => {
+      document.getElementById('tab-' + id).style.display = id === t ? '' : 'none';
+    });
+    document.querySelectorAll('.tab').forEach((el, i) => {
+      el.classList.toggle('active', ['size', 'dscr', 'amort', 'about'][i] === t);
+    });
+    if (t === 'amort') calcAmort();
+    if (t === 'dscr')  calcDscr();
+  }
+
+  function calcDscr() {
+    const gpr   = +document.getElementById('d-gpr').value;
+    const vac   = +document.getElementById('d-vac').value / 100;
+    const exp   = +document.getElementById('d-exp').value / 100;
+    const res   = +document.getElementById('d-res').value;
+    const units = +document.getElementById('d-units').value;
+    const dLoan = +document.getElementById('d-loan').value;
+    const rate  = +document.getElementById('rate').value / 100;
+    const amYrs = +document.getElementById('amort').value;
+
+    document.getElementById('d-gpr-lbl').textContent = fmt(gpr);
+    document.getElementById('d-vac-lbl').textContent = (+document.getElementById('d-vac').value) + '%';
+    document.getElementById('d-exp-lbl').textContent = (+document.getElementById('d-exp').value) + '%';
+
+    const vacAmt = gpr * vac;
+    const egi    = gpr - vacAmt;
+    const opex   = egi * exp;
+    const resAmt = res * units;
+    const noi    = egi - opex - resAmt;
+
+    document.getElementById('dw-gpr').textContent  = fmtFull(gpr);
+    document.getElementById('dw-vac').textContent  = '(' + fmtFull(vacAmt) + ')';
+    document.getElementById('dw-egi').textContent  = fmtFull(egi);
+    document.getElementById('dw-opex').textContent = '(' + fmtFull(opex) + ')';
+    document.getElementById('dw-res').textContent  = resAmt > 0 ? '(' + fmtFull(resAmt) + ')' : '$0';
+    document.getElementById('dw-noi').textContent  = fmtFull(noi);
+
+    const lc  = loanConstant(rate, amYrs);
+    const ads = dLoan * lc;
+    const dscr= noi / ads;
+    const dy  = noi / dLoan;
+    const dscrEl = document.getElementById('d-dscr-val');
+    dscrEl.textContent = isFinite(dscr) ? dscr.toFixed(2) + 'x' : '—';
+    dscrEl.style.color = dscr >= 1.25 ? 'var(--teal-600)' : dscr >= 1.10 ? 'var(--amber-600)' : 'var(--red-600)';
+    document.getElementById('d-dy-val').textContent = isFinite(dy) ? pct(dy, 1) : '—';
+
+    // Sensitivity table
+    const rates    = [-0.015, -0.01, -0.005, 0, 0.005, 0.01, 0.015].map(d => rate + d).filter(r => r > 0);
+    const noiMults = [0.80, 0.90, 1.00, 1.10, 1.20];
+
+    const thead = document.getElementById('dscr-thead');
+    thead.innerHTML = '<th style="font-size:11px">NOI</th>' + rates.map(r => '<th>' + (r * 100).toFixed(2) + '%</th>').join('');
+    const tbody = document.getElementById('dscr-tbody');
+    tbody.innerHTML = '';
+
+    noiMults.forEach(m => {
+      const testNoi = noi * m;
+      const tr = document.createElement('tr');
+      let cells = '<td>' + fmt(testNoi) + '</td>';
+      rates.forEach(r => {
+        const lc2   = loanConstant(r, amYrs);
+        const ads2  = dLoan * lc2;
+        const d2    = testNoi / ads2;
+        const bg    = d2 >= 1.35 ? 'var(--teal-50)'   : d2 >= 1.25 ? 'var(--green-50)'  : d2 >= 1.10 ? 'var(--amber-50)' : 'var(--red-50)';
+        const color = d2 >= 1.25 ? 'var(--teal-600)'  : d2 >= 1.10 ? 'var(--amber-600)' : 'var(--red-600)';
+        cells += '<td style="background:' + bg + ';color:' + color + ';text-align:center">' + d2.toFixed(2) + 'x</td>';
+      });
+      tr.innerHTML = cells;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function setIo(v) {
+    useIo = v;
+    document.getElementById('io-field').style.display = v ? '' : 'none';
+    document.getElementById('tog-io').classList.toggle('sel', v);
+    document.getElementById('tog-full').classList.toggle('sel', !v);
+    calcAmort();
+  }
+
+  function calcAmort() {
+    const loan   = +document.getElementById('am-loan').value;
+    const rate   = +document.getElementById('am-rate').value / 100;
+    const amYrs  = +document.getElementById('am-am').value;
+    const termYrs= +document.getElementById('am-term').value;
+    const ioYrs  = useIo ? +document.getElementById('am-io').value : 0;
+
+    document.getElementById('am-loan-lbl').textContent  = fmt(loan);
+    document.getElementById('am-rate-lbl').textContent  = (+document.getElementById('am-rate').value).toFixed(2) + '%';
+    document.getElementById('am-am-lbl').textContent    = amYrs + ' yrs';
+    document.getElementById('am-term-lbl').textContent  = termYrs + ' yrs';
+    if (useIo) document.getElementById('am-io-lbl').textContent = ioYrs + ' yrs';
+
+    const ioPmt  = loan * rate / 12;
+    const fullPmt= monthlyPayment(loan, rate, amYrs);
+
+    let balance = loan, totInt = 0, totPay = 0;
+    const tbody = document.getElementById('am-tbody');
+    tbody.innerHTML = '';
+
+    for (let yr = 1; yr <= termYrs; yr++) {
+      let yrPrinc = 0, yrInt = 0, yrPay = 0;
+      const isIO = yr <= ioYrs;
+      const pmt  = isIO ? ioPmt : fullPmt;
+      for (let m = 0; m < 12; m++) {
+        if (balance <= 0) break;
+        const intPmt  = balance * rate / 12;
+        const princPmt= isIO ? 0 : Math.min(pmt - intPmt, balance);
+        yrInt   += intPmt;
+        yrPrinc += princPmt;
+        yrPay   += isIO ? ioPmt : pmt;
+        balance -= princPmt;
+      }
+      totInt  += yrInt;
+      totPay  += yrPay;
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + yr + '</td><td>' + fmt(yrPay) + '</td><td>' + fmt(yrPrinc) + '</td><td>' + fmt(yrInt) + '</td><td>' + fmt(Math.max(balance, 0)) + '</td><td style="text-align:center;color:var(--teal-600)">' + (isIO ? '✓' : '') + '</td>';
+      tbody.appendChild(tr);
+    }
+
+    document.getElementById('am-monthly').textContent  = fmt(useIo && ioYrs >= 1 ? ioPmt : fullPmt);
+    document.getElementById('am-balloon').textContent  = fmt(Math.max(balance, 0));
+    document.getElementById('am-totint').textContent   = fmt(totInt);
+    document.getElementById('am-totpay').textContent   = fmt(totPay);
+  }
+
+  calc();
+  calcDscr();
+</script>
+</body>
+</html>
