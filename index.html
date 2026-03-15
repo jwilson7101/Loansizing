@@ -3,11 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LoanSizing.com — Commercial Real Estate Loan Calculator</title>
-  <meta name="description" content="Free commercial real estate loan sizing calculator. Calculate maximum loan amounts using DSCR, LTV, and Debt Yield constraints. Built for CRE brokers, investors, and lenders.">
-  <meta property="og:title" content="LoanSizing.com — CRE Loan Calculator">
-  <meta property="og:description" content="The mortgage calculator for commercial real estate. Size loans by DSCR, LTV, and Debt Yield instantly.">
+
+  <!-- Primary SEO -->
+  <title>Commercial Real Estate Loan Calculator | DSCR, LTV & Debt Yield | LoanSizing.com</title>
+  <meta name="description" content="Free commercial real estate loan calculator. Instantly size CRE loans using DSCR, LTV, and Debt Yield constraints. Built for brokers, investors, and lenders. No sign-up required.">
+  <meta name="keywords" content="commercial real estate loan calculator, DSCR calculator, debt yield calculator, LTV calculator, CRE loan sizing, commercial mortgage calculator, DSCR LTV calculator, loan sizing tool, commercial real estate finance, NOI calculator, debt service coverage ratio">
+  <meta name="author" content="LoanSizing.com">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.loansizing.com/">
+
+  <!-- Open Graph (LinkedIn, Facebook) -->
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.loansizing.com/">
+  <meta property="og:title" content="Commercial Real Estate Loan Calculator | LoanSizing.com">
+  <meta property="og:description" content="The free mortgage calculator for commercial real estate. Size CRE loans by DSCR, LTV, and Debt Yield instantly. No login, no spreadsheets.">
+  <meta property="og:image" content="https://www.loansizing.com/og-image.png">
+  <meta property="og:site_name" content="LoanSizing.com">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://www.loansizing.com/">
+  <meta name="twitter:title" content="Commercial Real Estate Loan Calculator | LoanSizing.com">
+  <meta name="twitter:description" content="The free mortgage calculator for commercial real estate. Size CRE loans by DSCR, LTV, and Debt Yield instantly.">
+  <meta name="twitter:image" content="https://www.loansizing.com/og-image.png">
+
+  <!-- Schema Markup: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Commercial Real Estate Loan Calculator",
+    "url": "https://www.loansizing.com",
+    "description": "Free commercial real estate loan sizing calculator. Calculate maximum loan amounts using DSCR, LTV, and Debt Yield constraints. Built for CRE brokers, investors, and lenders.",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "DSCR Calculator",
+      "Loan-to-Value Calculator",
+      "Debt Yield Calculator",
+      "Amortization Schedule",
+      "Interest Only Period",
+      "NOI Waterfall",
+      "DSCR Sensitivity Analysis"
+    ],
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Commercial Real Estate Brokers, Investors, Lenders, Underwriters"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "LoanSizing.com",
+      "url": "https://www.loansizing.com"
+    }
+  }
+  </script>
+
+  <!-- Schema Markup: FAQPage for search rich snippets -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a DSCR calculator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A DSCR (Debt Service Coverage Ratio) calculator measures whether a commercial property generates enough income to cover its loan payments. DSCR = Net Operating Income divided by Annual Debt Service. Lenders typically require a minimum DSCR of 1.20x to 1.30x for commercial real estate loans."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is debt yield in commercial real estate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Debt yield is calculated as Net Operating Income divided by the loan amount. It measures the return a lender would earn if they foreclosed on a property. Lenders typically require a minimum debt yield of 8-10% for commercial real estate loans. Unlike DSCR, debt yield is not affected by interest rates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do you size a commercial real estate loan?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Commercial real estate loans are sized using three constraints simultaneously: Loan-to-Value (LTV), Debt Service Coverage Ratio (DSCR), and Debt Yield. The maximum loan amount is the lowest of all three calculations. LoanSizing.com calculates all three instantly and identifies the binding constraint."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the maximum LTV for a commercial real estate loan?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most commercial real estate lenders cap loans at 65-75% LTV (Loan-to-Value). This means if a property is worth $10 million, the maximum loan would be $6.5M to $7.5M based on LTV alone. The actual maximum loan may be lower if DSCR or Debt Yield constraints are more restrictive."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -962,6 +1060,5 @@
   calc();
   calcDscr();
 </script>
-  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
